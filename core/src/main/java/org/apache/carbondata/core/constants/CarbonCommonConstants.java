@@ -1489,7 +1489,8 @@ public final class CarbonCommonConstants {
   public static final String CARBON_LUCENE_INDEX_STOP_WORDS_DEFAULT = "false";
 
   @CarbonProperty
-  public static final String CARBON_LUCENE_DATAMAP_CUSTOM_ANALYZER = "carbon.lucene.datamap.custom.analyzer";
+  public static final String CARBON_LUCENE_DATAMAP_CUSTOM_ANALYZER =
+          "carbon.lucene.datamap.custom.analyzer";
 
   public static final String CARBON_LUCENE_DATAMAP_CUSTOM_ANALYZER_DEFAULT = "StandardAnalyzer";
 

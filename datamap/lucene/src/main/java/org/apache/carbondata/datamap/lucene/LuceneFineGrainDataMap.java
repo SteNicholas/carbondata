@@ -26,6 +26,7 @@ import java.util.Map;
 
 import org.apache.carbondata.common.annotations.InterfaceAudience;
 import org.apache.carbondata.common.logging.LogServiceFactory;
+import org.apache.carbondata.core.constants.CarbonCommonConstants;
 import org.apache.carbondata.core.datamap.dev.DataMapModel;
 import org.apache.carbondata.core.datamap.dev.fgdatamap.FineGrainBlocklet;
 import org.apache.carbondata.core.datamap.dev.fgdatamap.FineGrainDataMap;
@@ -39,9 +40,11 @@ import org.apache.carbondata.core.scan.expression.MatchExpression;
 import org.apache.carbondata.core.scan.filter.intf.ExpressionType;
 import org.apache.carbondata.core.scan.filter.resolver.FilterResolverIntf;
 
+import org.apache.carbondata.core.util.CarbonProperties;
 import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.cn.smart.SmartChineseAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
@@ -224,7 +227,14 @@ public class LuceneFineGrainDataMap extends FineGrainDataMap {
 
     // get analyzer
     if (analyzer == null) {
-      analyzer = new StandardAnalyzer();
+      if (CarbonProperties.getInstance()
+              .getProperty(CarbonCommonConstants.CARBON_LUCENE_DATAMAP_CUSTOM_ANALYZER,
+                      CarbonCommonConstants.CARBON_LUCENE_DATAMAP_CUSTOM_ANALYZER_DEFAULT)
+              .equalsIgnoreCase("SmartChineseAnalyzer")) {
+        analyzer = new SmartChineseAnalyzer();
+      } else {
+        analyzer = new StandardAnalyzer();
+      }
     }
 
     // use MultiFieldQueryParser to parser query

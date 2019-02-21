@@ -26,6 +26,7 @@ import java.util.Objects;
 import org.apache.carbondata.common.annotations.InterfaceAudience;
 import org.apache.carbondata.common.exceptions.sql.MalformedDataMapCommandException;
 import org.apache.carbondata.common.logging.LogServiceFactory;
+import org.apache.carbondata.core.constants.CarbonCommonConstants;
 import org.apache.carbondata.core.datamap.DataMapDistributable;
 import org.apache.carbondata.core.datamap.DataMapLevel;
 import org.apache.carbondata.core.datamap.DataMapMeta;
@@ -48,12 +49,14 @@ import org.apache.carbondata.core.metadata.schema.table.DataMapSchema;
 import org.apache.carbondata.core.metadata.schema.table.column.CarbonColumn;
 import org.apache.carbondata.core.scan.filter.intf.ExpressionType;
 import org.apache.carbondata.core.statusmanager.SegmentStatusManager;
+import org.apache.carbondata.core.util.CarbonProperties;
 import org.apache.carbondata.core.util.CarbonUtil;
 import org.apache.carbondata.core.util.path.CarbonTablePath;
 import org.apache.carbondata.events.Event;
 
 import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.cn.smart.SmartChineseAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 
 /**
@@ -141,8 +144,14 @@ abstract class LuceneDataMapFactoryBase<T extends DataMap> extends DataMapFactor
     optimizedOperations.add(ExpressionType.TEXT_MATCH);
     this.dataMapMeta = new DataMapMeta(indexedCarbonColumns, optimizedOperations);
     // get analyzer
-    // TODO: how to get analyzer ?
-    analyzer = new StandardAnalyzer();
+    if (CarbonProperties.getInstance()
+            .getProperty(CarbonCommonConstants.CARBON_LUCENE_DATAMAP_CUSTOM_ANALYZER,
+                    CarbonCommonConstants.CARBON_LUCENE_DATAMAP_CUSTOM_ANALYZER_DEFAULT)
+            .equalsIgnoreCase("SmartChineseAnalyzer")) {
+      analyzer = new SmartChineseAnalyzer();
+    } else {
+      analyzer = new StandardAnalyzer();
+    }
   }
 
   public static int validateAndGetWriteCacheSize(DataMapSchema schema) {

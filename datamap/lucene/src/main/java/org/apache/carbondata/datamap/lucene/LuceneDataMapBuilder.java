@@ -41,6 +41,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.cn.smart.SmartChineseAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.codecs.lucene50.Lucene50StoredFieldsFormat;
 import org.apache.lucene.codecs.lucene62.Lucene62Codec;
@@ -108,7 +109,14 @@ public class LuceneDataMapBuilder implements DataMapBuilder {
     }
 
     if (null == analyzer) {
-      analyzer = new StandardAnalyzer();
+      if (CarbonProperties.getInstance()
+              .getProperty(CarbonCommonConstants.CARBON_LUCENE_DATAMAP_CUSTOM_ANALYZER,
+                      CarbonCommonConstants.CARBON_LUCENE_DATAMAP_CUSTOM_ANALYZER_DEFAULT)
+              .equalsIgnoreCase("SmartChineseAnalyzer")) {
+        analyzer = new SmartChineseAnalyzer();
+      } else {
+        analyzer = new StandardAnalyzer();
+      }
     }
 
     // create a index writer

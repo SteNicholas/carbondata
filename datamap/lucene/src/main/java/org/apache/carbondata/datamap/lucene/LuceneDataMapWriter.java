@@ -44,6 +44,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.CharArraySet;
+import org.apache.lucene.analysis.cn.smart.SmartChineseAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.codecs.Codec;
 import org.apache.lucene.codecs.lucene50.Lucene50StoredFieldsFormat;
@@ -130,13 +131,25 @@ public class LuceneDataMapWriter extends DataMapWriter {
    */
   public void onBlockletStart(int blockletId) throws IOException {
     if (null == analyzer) {
+      boolean customAnalyzer = CarbonProperties.getInstance()
+              .getProperty(CarbonCommonConstants.CARBON_LUCENE_DATAMAP_CUSTOM_ANALYZER,
+                      CarbonCommonConstants.CARBON_LUCENE_DATAMAP_CUSTOM_ANALYZER_DEFAULT)
+              .equalsIgnoreCase("SmartChineseAnalyzer");
       if (CarbonProperties.getInstance()
           .getProperty(CarbonCommonConstants.CARBON_LUCENE_INDEX_STOP_WORDS,
               CarbonCommonConstants.CARBON_LUCENE_INDEX_STOP_WORDS_DEFAULT)
           .equalsIgnoreCase("true")) {
-        analyzer = new StandardAnalyzer(CharArraySet.EMPTY_SET);
+        if (customAnalyzer) {
+          analyzer = new SmartChineseAnalyzer(CharArraySet.EMPTY_SET);
+        } else {
+          analyzer = new StandardAnalyzer(CharArraySet.EMPTY_SET);
+        }
       } else {
-        analyzer = new StandardAnalyzer();
+        if (customAnalyzer) {
+          analyzer = new SmartChineseAnalyzer();
+        } else {
+          analyzer = new StandardAnalyzer();
+        }
       }
     }
     // save index data into ram, write into disk after one page finished
